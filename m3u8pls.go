@@ -145,6 +145,16 @@ func (m *M3U8pls) analyzem3u8() {
 
 func substream(m3u8, sub string) string {
 	var substream string
+	is_extra := false
+	var extra string
+
+	// extra = ?whatever after the base url (authentication, etc)
+	if strings.Contains(m3u8,"?"){
+		is_extra = true
+		p := strings.Split(m3u8,"?")
+		m3u8 = p[0]
+		extra = p[1]
+	}
 
 	m3u8 = m3u8[7:] // quito http://
 	substream = "http://"
@@ -156,6 +166,10 @@ func substream(m3u8, sub string) string {
 		} else {
 			substream = substream + v + "/"
 		}
+	}
+
+	if is_extra {
+		substream = substream + "?" + extra
 	}
 
 	return substream
