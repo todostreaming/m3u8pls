@@ -14,7 +14,7 @@ type M3U8pls struct {
 	Mediaseq  int64
 	Segment   []string
 	Duration  []float64
-	Ok			bool  // the .m3u8 playlist is reachable and has segments
+	Ok        bool // the .m3u8 playlist is reachable and has segments
 	mu_pls    sync.Mutex
 }
 
@@ -98,7 +98,6 @@ func (m *M3U8pls) analyzem3u8() {
 	if issubstr {
 		resp, err := http.Get(substr)
 		if err != nil {
-			fmt.Println("No m3u8")
 			return
 		}
 		if resp.StatusCode != 200 {
