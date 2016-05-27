@@ -3,7 +3,6 @@ package m3u8pls
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -15,6 +14,7 @@ type M3U8pls struct {
 	Mediaseq  int64
 	Segment   []string
 	Duration  []float64
+	Ok			bool  // the .m3u8 playlist is reachable and has segments
 	mu_pls    sync.Mutex
 }
 
@@ -34,6 +34,7 @@ func (m *M3U8pls) Parse() {
 	m.Mediaseq = 0
 	m.Segment = []string{}
 	m.Duration = []float64{}
+	m.Ok = false
 	m.mu_pls.Unlock()
 
 	m.analyzem3u8()
@@ -47,7 +48,10 @@ func (m *M3U8pls) analyzem3u8() {
 	m.mu_pls.Unlock()
 	resp, err := http.Get(m3u8)
 	if err != nil {
-		log.Fatal(err)
+		return
+	}
+	if resp.StatusCode != 200 {
+		return
 	}
 	reader := bufio.NewReader(resp.Body)
 	for {
@@ -85,6 +89,7 @@ func (m *M3U8pls) analyzem3u8() {
 		if strings.Contains(line, ".ts") {
 			m.mu_pls.Lock()
 			m.Segment = append(m.Segment, substream(m3u8, line))
+			m.Ok = true
 			m.mu_pls.Unlock()
 		}
 		//fmt.Printf("1)=>[%s]<=\n",line)
@@ -93,7 +98,11 @@ func (m *M3U8pls) analyzem3u8() {
 	if issubstr {
 		resp, err := http.Get(substr)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("No m3u8")
+			return
+		}
+		if resp.StatusCode != 200 {
+			return
 		}
 		reader := bufio.NewReader(resp.Body)
 		for {
@@ -126,6 +135,7 @@ func (m *M3U8pls) analyzem3u8() {
 			if strings.Contains(line, ".ts") {
 				m.mu_pls.Lock()
 				m.Segment = append(m.Segment, substream(substr, line))
+				m.Ok = true
 				m.mu_pls.Unlock()
 			}
 			//fmt.Printf("2)=>[%s]<=\n",line)
