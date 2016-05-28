@@ -41,8 +41,9 @@ func (m *M3U8pls) Parse() {
 }
 
 func (m *M3U8pls) analyzem3u8() {
-	substr := ""
-	issubstr := false
+	var substr string
+	var issubstr bool
+
 	m.mu_pls.Lock()
 	m3u8 := m.m3u8
 	m.mu_pls.Unlock()
@@ -156,9 +157,8 @@ func (m *M3U8pls) analyzem3u8() {
 }
 
 func substream(m3u8, sub string) string {
-	var substream string
-	is_extra := false
-	var extra string
+	var substream, extra string
+	var is_extra bool
 
 	// extra = ?whatever after the base url (authentication, etc)
 	if strings.Contains(m3u8, "?") {
