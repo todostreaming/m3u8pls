@@ -85,6 +85,9 @@ func (m *M3U8pls) analyzem3u8() {
 		if strings.Contains(line, "#EXTINF:") {
 			var extinf float64
 			fmt.Sscanf(line, "#EXTINF:%f,", &extinf)
+			if extinf > 18 {
+				extinf = 18.0
+			}
 			m.mu_pls.Lock()
 			m.Duration = append(m.Duration, extinf)
 			m.mu_pls.Unlock()
@@ -133,6 +136,9 @@ func (m *M3U8pls) analyzem3u8() {
 			if strings.Contains(line, "#EXTINF:") {
 				var extinf float64
 				fmt.Sscanf(line, "#EXTINF:%f,", &extinf)
+				if extinf > 18 {
+					extinf = 18.0
+				}
 				m.mu_pls.Lock()
 				m.Duration = append(m.Duration, extinf)
 				m.mu_pls.Unlock()
