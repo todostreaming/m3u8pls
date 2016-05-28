@@ -68,6 +68,9 @@ func (m *M3U8pls) analyzem3u8() {
 		if strings.Contains(line, "#EXT-X-TARGETDURATION:") {
 			var targetdur float64
 			fmt.Sscanf(line, "#EXT-X-TARGETDURATION:%f", &targetdur)
+			if targetdur > 12 {
+				targetdur = 12.0
+			}
 			m.mu_pls.Lock()
 			m.Targetdur = targetdur
 			m.mu_pls.Unlock()
@@ -113,6 +116,9 @@ func (m *M3U8pls) analyzem3u8() {
 			if strings.Contains(line, "#EXT-X-TARGETDURATION:") {
 				var targetdur float64
 				fmt.Sscanf(line, "#EXT-X-TARGETDURATION:%f", &targetdur)
+				if targetdur > 12 {
+					targetdur = 12.0
+				}
 				m.mu_pls.Lock()
 				m.Targetdur = targetdur
 				m.mu_pls.Unlock()
