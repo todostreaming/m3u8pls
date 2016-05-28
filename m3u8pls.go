@@ -155,9 +155,9 @@ func substream(m3u8, sub string) string {
 	var extra string
 
 	// extra = ?whatever after the base url (authentication, etc)
-	if strings.Contains(m3u8,"?"){
+	if strings.Contains(m3u8, "?") {
 		is_extra = true
-		p := strings.Split(m3u8,"?")
+		p := strings.Split(m3u8, "?")
 		m3u8 = p[0]
 		extra = p[1]
 	}
