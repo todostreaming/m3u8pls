@@ -45,8 +45,9 @@ func (m *M3U8pls) Parse() {
 }
 
 func (m *M3U8pls) analyzem3u8() {
-	substr := ""
-	issubstr := false
+	var substr string
+	var issubstr bool
+
 	m.mu_pls.Lock()
 	if m.fails > 2 {
 		m.m3u8 = m.m3u8base
@@ -83,6 +84,9 @@ func (m *M3U8pls) analyzem3u8() {
 		if strings.Contains(line, "#EXT-X-TARGETDURATION:") {
 			var targetdur float64
 			fmt.Sscanf(line, "#EXT-X-TARGETDURATION:%f", &targetdur)
+			if targetdur > 12 {
+				targetdur = 12.0
+			}
 			m.mu_pls.Lock()
 			m.Targetdur = targetdur
 			m.mu_pls.Unlock()
@@ -97,6 +101,9 @@ func (m *M3U8pls) analyzem3u8() {
 		if strings.Contains(line, "#EXTINF:") {
 			var extinf float64
 			fmt.Sscanf(line, "#EXTINF:%f,", &extinf)
+			if extinf > 18 {
+				extinf = 18.0
+			}
 			m.mu_pls.Lock()
 			m.Duration = append(m.Duration, extinf)
 			m.mu_pls.Unlock()
@@ -128,6 +135,9 @@ func (m *M3U8pls) analyzem3u8() {
 			if strings.Contains(line, "#EXT-X-TARGETDURATION:") {
 				var targetdur float64
 				fmt.Sscanf(line, "#EXT-X-TARGETDURATION:%f", &targetdur)
+				if targetdur > 12 {
+					targetdur = 12.0
+				}
 				m.mu_pls.Lock()
 				m.Targetdur = targetdur
 				m.mu_pls.Unlock()
@@ -142,6 +152,9 @@ func (m *M3U8pls) analyzem3u8() {
 			if strings.Contains(line, "#EXTINF:") {
 				var extinf float64
 				fmt.Sscanf(line, "#EXTINF:%f,", &extinf)
+				if extinf > 18 {
+					extinf = 18.0
+				}
 				m.mu_pls.Lock()
 				m.Duration = append(m.Duration, extinf)
 				m.mu_pls.Unlock()
@@ -159,14 +172,13 @@ func (m *M3U8pls) analyzem3u8() {
 }
 
 func substream(m3u8, sub string) string {
-	var substream string
-	is_extra := false
-	var extra string
+	var substream, extra string
+	var is_extra bool
 
 	// extra = ?whatever after the base url (authentication, etc)
-	if strings.Contains(m3u8,"?"){
+	if strings.Contains(m3u8, "?") {
 		is_extra = true
-		p := strings.Split(m3u8,"?")
+		p := strings.Split(m3u8, "?")
 		m3u8 = p[0]
 		extra = p[1]
 	}
