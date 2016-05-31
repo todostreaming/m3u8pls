@@ -9,7 +9,9 @@ import (
 )
 
 type M3U8pls struct {
+	m3u8base	string
 	m3u8      string
+	fails		int
 	Targetdur float64
 	Mediaseq  int64
 	Segment   []string
@@ -24,6 +26,8 @@ func M3U8playlist(m3u8 string) *M3U8pls {
 	defer m3u.mu_pls.Unlock()
 
 	m3u.m3u8 = m3u8
+	m3u.m3u8base = m3u8
+	m3u.fails = 0
 
 	return m3u
 }
@@ -44,10 +48,17 @@ func (m *M3U8pls) analyzem3u8() {
 	substr := ""
 	issubstr := false
 	m.mu_pls.Lock()
+	if m.fails > 2 {
+		m.m3u8 = m.m3u8base
+		m.fails = 0
+	}
 	m3u8 := m.m3u8
 	m.mu_pls.Unlock()
 	resp, err := http.Get(m3u8)
 	if err != nil {
+		m.mu_pls.Lock()
+		m.fails++
+		m.mu_pls.Unlock()
 		return
 	}
 	if resp.StatusCode != 200 {
@@ -60,8 +71,12 @@ func (m *M3U8pls) analyzem3u8() {
 			break
 		}
 		line = strings.TrimRight(line, "\n")
-		if strings.Contains(line, ".m3u8") {
+		if strings.Contains(line, ".m3u8") { // hay substream tipo wowza
 			substr = substream(m3u8, line)
+			m3u8 = substr
+			m.mu_pls.Lock()
+			m.m3u8 = m3u8
+			m.mu_pls.Unlock()
 			issubstr = true
 			break
 		}
