@@ -9,9 +9,9 @@ import (
 )
 
 type M3U8pls struct {
-	m3u8base	string
+	m3u8base  string
 	m3u8      string
-	fails		int
+	fails     int
 	Targetdur float64
 	Mediaseq  int64
 	Segment   []string
