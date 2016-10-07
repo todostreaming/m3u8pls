@@ -3,7 +3,9 @@ package m3u8pls
 import (
 	"bufio"
 	"fmt"
-	"net/http"
+	//	"net/http"
+	"io"
+	"os/exec"
 	"strings"
 	"sync"
 )
@@ -55,17 +57,19 @@ func (m *M3U8pls) analyzem3u8() {
 	}
 	m3u8 := m.m3u8
 	m.mu_pls.Unlock()
-	resp, err := http.Get(m3u8)
+	//	resp, err := http.Get(m3u8)
+	resp, err := miGet(m3u8)
 	if err != nil {
 		m.mu_pls.Lock()
 		m.fails++
 		m.mu_pls.Unlock()
 		return
 	}
-	if resp.StatusCode != 200 {
-		return
-	}
-	reader := bufio.NewReader(resp.Body)
+	//	if resp.StatusCode != 200 {
+	//		return
+	//	}
+	//	reader := bufio.NewReader(resp.Body)
+	reader := bufio.NewReader(resp)
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -116,16 +120,18 @@ func (m *M3U8pls) analyzem3u8() {
 		}
 		//fmt.Printf("1)=>[%s]<=\n",line)
 	}
-	resp.Body.Close()
+	//	resp.Body.Close()
 	if issubstr {
-		resp, err := http.Get(substr)
+		//		resp, err := http.Get(substr)
+		resp, err := miGet(substr)
 		if err != nil {
 			return
 		}
-		if resp.StatusCode != 200 {
-			return
-		}
-		reader := bufio.NewReader(resp.Body)
+		//		if resp.StatusCode != 200 {
+		//			return
+		//		}
+		//		reader := bufio.NewReader(resp.Body)
+		reader := bufio.NewReader(resp)
 		for {
 			line, err := reader.ReadString('\n')
 			if err != nil {
@@ -167,7 +173,7 @@ func (m *M3U8pls) analyzem3u8() {
 			}
 			//fmt.Printf("2)=>[%s]<=\n",line)
 		}
-		resp.Body.Close()
+		//		resp.Body.Close()
 	}
 }
 
@@ -200,4 +206,16 @@ func substream(m3u8, sub string) string {
 	}
 
 	return substream
+}
+
+// /usr/bin/wget -q -t 3 -O /dev/stdout 'http://pablo001.todostreaming.es/radiovida/livestream/playlist.m3u8'
+func miGet(url string) (resp io.Reader, err error) {
+	comando := fmt.Sprintf("/usr/bin/wget -q -t 3 -O /dev/stdout '%s'", url)
+	arrayout, err2 := exec.Command("/bin/sh", "-c", comando).CombinedOutput()
+	if err2 != nil {
+		err = fmt.Errorf("miGet: Cannot get the url")
+	}
+	resp = strings.NewReader(string(arrayout))
+
+	return
 }
