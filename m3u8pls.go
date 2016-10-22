@@ -208,7 +208,6 @@ func substream(m3u8, sub string) string {
 	return substream
 }
 
-// /usr/bin/wget -q -t 3 -O /dev/stdout 'http://pablo001.todostreaming.es/radiovida/livestream/playlist.m3u8'
 func miGet(url string) (resp io.Reader, err error) {
 	comando := fmt.Sprintf("/usr/bin/wget -q -t 3 -O /dev/stdout '%s'", url)
 	arrayout, err2 := exec.Command("/bin/sh", "-c", comando).CombinedOutput()
