@@ -181,6 +181,10 @@ func substream(m3u8, sub string) string {
 	var substream, extra string
 	var is_extra bool
 
+	if strings.Contains(sub, "http://") { // for Akamai
+		return sub
+	}
+
 	// extra = ?whatever after the base url (authentication, etc)
 	if strings.Contains(m3u8, "?") {
 		is_extra = true
